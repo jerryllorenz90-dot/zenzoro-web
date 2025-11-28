@@ -1,30 +1,30 @@
-// SELECT ELEMENTS
+// SELECT UI ELEMENTS
 const statusBox = document.getElementById("server-status");
 const priceBox  = document.getElementById("btc-price");
 
-// BASE API URL
+// BACKEND API BASE URL
 const API = "https://zenzoro.online/api";
 
-// HANDLE SERVER STATUS
+// SERVER STATUS CHECK
 document.getElementById("check-status").addEventListener("click", async () => {
-  statusBox.textContent = "Checking...";
+  statusBox.textContent = "Checking server...";
   try {
     const res = await fetch(`${API}/status`);
-    const data = await res.json();
-    statusBox.textContent = JSON.stringify(data, null, 2);
-  } catch (err) {
-    statusBox.textContent = "Error: " + err.message;
+    const json = await res.json();
+    statusBox.textContent = JSON.stringify(json, null, 2);
+  } catch (error) {
+    statusBox.textContent = "Error: " + error.message;
   }
 });
 
-// HANDLE BTC PRICE
+// GET BTC PRICE
 document.getElementById("get-btc").addEventListener("click", async () => {
-  priceBox.textContent = "Loading...";
+  priceBox.textContent = "Loading BTC price...";
   try {
     const res = await fetch(`${API}/price/btc`);
-    const data = await res.json();
-    priceBox.textContent = JSON.stringify(data, null, 2);
-  } catch (err) {
-    priceBox.textContent = "Error: " + err.message;
+    const json = await res.json();
+    priceBox.textContent = JSON.stringify(json, null, 2);
+  } catch (error) {
+    priceBox.textContent = "Error: " + error.message;
   }
 });
