@@ -7,16 +7,17 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 8080;
 
-// Health check
+// Health route
 app.get("/api/status", (req, res) => {
   res.json({ status: "Server is running!" });
 });
 
-// BTC Price route
+// Correct price route
 app.get("/api/price/btc", async (req, res) => {
   res.json({ btc: "78000" });
 });
-// Root
+
+// Root fallback
 app.get("/", (req, res) => {
   res.send("Zenzoro Backend Running");
 });
