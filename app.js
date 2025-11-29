@@ -1,32 +1,37 @@
-// SELECT UI ELEMENTS
-const statusBox = document.getElementById("server-status");
-const priceBox  = document.getElementById("btc-price");
+// --- UI ELEMENTS ---
+const output = document.getElementById("output");
 
-// BACKEND API BASE URL
+// --- BACKEND BASE URL ---
 const API = "https://zenzoro.online/api";
 
-// SERVER STATUS CHECK
+// --- CHECK SERVER STATUS ---
 document.getElementById("check-status").addEventListener("click", async () => {
-  statusBox.textContent = "Checking server...";
-  
+  output.textContent = "Checking server...";
   try {
     const res = await fetch(`${API}/status`);
-    const text = await res.text();  // <-- backend returns plain text
-    statusBox.textContent = text;
+    const json = await res.json();
+    output.textContent = JSON.stringify(json, null, 2);
   } catch (error) {
-    statusBox.textContent = "Error: " + error.message;
+    output.textContent = "Error: " + error.message;
   }
 });
 
-// GET BTC PRICE
-document.getElementById("get-btc").addEventListener("click", async () => {
-  priceBox.textContent = "Loading BTC price...";
+// --- GET PRICE FOR SELECTED COIN ---
+document.getElementById("get-coin").addEventListener("click", async () => {
+  const coin = document.getElementById("coin-select").value;
+  output.textContent = "Loading price...";
 
   try {
-    const res = await fetch(`${API}/price/btc`);
-    const json = await res.json();  // valid JSON
-    priceBox.textContent = json.btc; // show ONLY the number
+    let endpoint = coin === "btc" ? "/price/btc" : "/prices";
+    const res = await fetch(`${API}${endpoint}`);
+    const json = await res.json();
+
+    if (coin === "btc") {
+      output.textContent = `BTC: $${json.btc}`;
+    } else {
+      output.textContent = `${coin.toUpperCase()}: $${json[coin.toUpperCase()]}`;
+    }
   } catch (error) {
-    priceBox.textContent = "Error: " + error.message;
+    output.textContent = "Error: " + error.message;
   }
 });
