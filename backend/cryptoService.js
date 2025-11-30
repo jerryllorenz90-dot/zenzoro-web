@@ -33,8 +33,8 @@ async function getPrices(symbols) {
 
   const ids = validSymbols.map((s) => SYMBOL_MAP[s].id).join(",");
 
-  const url = `${COINGECKO_BASE}/simple/price` +
-    `?ids=${encodeURIComponent(ids)}` +
+  const url =
+    `${COINGECKO_BASE}/simple/price?ids=${ids}` +
     "&vs_currencies=usd" +
     "&include_24hr_change=true" +
     "&include_market_cap=true" +
@@ -43,7 +43,7 @@ async function getPrices(symbols) {
 
   const raw = await fetchJson(url);
 
-  const result = validSymbols.map((symbol) => {
+  return validSymbols.map((symbol) => {
     const { id, name } = SYMBOL_MAP[symbol];
     const item = raw[id];
 
@@ -56,8 +56,6 @@ async function getPrices(symbols) {
       volume24h: item?.usd_24h_vol ?? null
     };
   });
-
-  return result;
 }
 
 // Get price history for a single symbol
@@ -67,18 +65,15 @@ async function getHistory(symbol, days) {
     throw new Error(`Unknown symbol: ${symbol}`);
   }
 
-  const url = `${COINGECKO_BASE}/coins/${info.id}/market_chart` +
-    `?vs_currency=usd&days=${days}&precision=2`;
+  const url =
+    `${COINGECKO_BASE}/coins/${info.id}/market_chart?vs_currency=usd&days=${days}&precision=2`;
 
   const raw = await fetchJson(url);
 
-  // raw.prices: [ [timestamp, price], ... ]
-  const history = (raw.prices || []).map(([ts, price]) => ({
+  return (raw.prices || []).map(([ts, price]) => ({
     time: ts,
     price
   }));
-
-  return history;
 }
 
 module.exports = {
