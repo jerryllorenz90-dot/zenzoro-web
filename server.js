@@ -1,68 +1,72 @@
-// server.js - ZENZORO production backend
-const path = require("path");
-const express = require("express");
-const cors = require("cors");
-const { getPrices, getHistory } = require("./backend/cryptoService");
+// server.js
+import express from "express";
+import mongoose from "mongoose";
+import cors from "cors";
 
 const app = express();
-
-// Middleware
-app.use(cors());
 app.use(express.json());
+app.use(cors());
 
-// Serve static frontend
-const publicDir = path.join(__dirname, "public");
-app.use(express.static(publicDir));
+// Connect to MongoDB
+const MONGODB_URI = process.env.MONGO_URI;
 
-// Health check
-app.get("/api/status", (req, res) => {
+mongoose
+  .connect(MONGODB_URI, { dbName: "zenzoro", useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log("✅ MongoDB Connected"))
+  .catch((err) => console.error("❌ MongoDB Connection Error:", err));
+
+// User Schema
+const userSchema = new mongoose.Schema({
+  email: { type: String, unique: true },
+  password: String,
+  portfolio: {
+    btc: { type: Number, default: 0 },
+    eth: { type: Number, default: 0 },
+    sol: { type: Number, default: 0 },
+    bnb: { type: Number, default: 0 },
+    doge: { type: Number, default: 0 }
+  }
+});
+
+const User = mongoose.model("User", userSchema);
+
+// Routes
+app.get("/status", (req, res) => {
+  res.json({ status: "ok", service: "Zenzoro backend" });
+});
+
+// Register route
+app.post("/auth/register", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const exists = await User.findOne({ email });
+    if (exists) return res.json({ error: "User already exists" });
+
+    const newUser = new User({ email, password });
+    await newUser.save();
+
+    res.json({ success: true, message: "Account created" });
+  } catch (err) {
+    res.json({ error: err.message });
+  }
+});
+
+// Login route
+app.post("/auth/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  const user = await User.findOne({ email });
+  if (!user || user.password !== password)
+    return res.json({ error: "Invalid email or password" });
+
   res.json({
-    status: "ok",
-    service: "Zenzoro backend",
-    time: new Date().toISOString()
+    success: true,
+    message: "Login successful",
+    portfolio: user.portfolio
   });
 });
 
-// Current prices for multiple coins
-// GET /api/prices?symbols=btc,eth,sol,bnb,doge
-app.get("/api/prices", async (req, res) => {
-  try {
-    const symbolsParam = req.query.symbols || "btc,eth,sol,bnb,doge";
-    const symbols = symbolsParam.split(",").map((s) => s.trim().toLowerCase());
-    const data = await getPrices(symbols);
-    res.json({ ok: true, data });
-  } catch (err) {
-    console.error("Error in /api/prices:", err);
-    res.status(500).json({ ok: false, error: "Failed to load prices" });
-  }
-});
-
-// Historical price data (for chart)
-// GET /api/history/btc?days=7
-app.get("/api/history/:symbol", async (req, res) => {
-  try {
-    const symbol = req.params.symbol.toLowerCase();
-    const days = parseInt(req.query.days || "7", 10);
-    const history = await getHistory(symbol, days);
-    res.json({ ok: true, symbol, history });
-  } catch (err) {
-    console.error("Error in /api/history:", err);
-    res.status(500).json({ ok: false, error: "Failed to load history" });
-  }
-});
-
-// Fallback: always return index.html for unknown routes (SPA-style)
-app.get("*", (req, res) => {
-  res.sendFile(path.join(publicDir, "index.html"));
-});
-
-// Railway / local port
-const PORT =
-  process.env.PORT ||
-  process.env.RAILWAY_PORT ||
-  process.env.NODE_PORT ||
-  8080;
-
-app.listen(PORT, () => {
-  console.log(`ZENZORO backend running on port ${PORT}`);
-});
+// Server
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
