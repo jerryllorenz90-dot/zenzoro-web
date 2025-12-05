@@ -1,12 +1,109 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Zenzoro</title>
   <meta charset="UTF-8" />
+  <title>Zenzoro – Crypto Monitor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/styles.css" />
+  <!-- Chart.js for the price history chart -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <h1>Zenzoro Backend Is Running</h1>
-  <p>Your frontend is not set yet.</p>
-  <p>But the server is ready.</p>
+  <div class="page">
+    <!-- Top nav / brand -->
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-logo">Z</div>
+        <div class="brand-text">
+          <div class="brand-title">Zenzoro</div>
+          <div class="brand-subtitle">Realtime Crypto Monitor</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <span class="pill pill-live">Live</span>
+        <button id="refresh-all" class="btn btn-outline">Refresh Data</button>
+      </div>
+    </header>
+
+    <!-- Main layout -->
+    <main class="layout">
+      <!-- Left column: status + market overview -->
+      <section class="column">
+        <!-- Server status card -->
+        <section class="card card-status">
+          <div class="card-header">
+            <h2>Backend Status</h2>
+            <span id="status-indicator" class="dot dot-offline"></span>
+          </div>
+          <pre id="status-json" class="code-block">Loading status…</pre>
+        </section>
+
+        <!-- Market overview card -->
+        <section class="card card-market">
+          <div class="card-header space-between">
+            <div>
+              <h2>Market Overview</h2>
+              <p class="card-subtitle">Top coins powered by Zenzoro backend</p>
+            </div>
+            <div class="chip-group" id="coin-filter">
+              <button class="chip chip-active" data-symbol="BTC">BTC</button>
+              <button class="chip" data-symbol="ETH">ETH</button>
+              <button class="chip" data-symbol="SOL">SOL</button>
+              <button class="chip" data-symbol="BNB">BNB</button>
+              <button class="chip" data-symbol="DOGE">DOGE</button>
+            </div>
+          </div>
+
+          <div id="market-error" class="error-text hidden"></div>
+
+          <div id="market-cards" class="market-grid">
+            <!-- JS will fill cards here -->
+          </div>
+
+          <p id="market-updated" class="updated-text"></p>
+        </section>
+      </section>
+
+      <!-- Right column: history chart -->
+      <section class="column">
+        <section class="card card-history">
+          <div class="card-header space-between">
+            <div>
+              <h2>Price History</h2>
+              <p class="card-subtitle">Interactive 7–90 day chart</p>
+            </div>
+            <div class="controls">
+              <select id="history-symbol" class="select">
+                <option value="bitcoin">BTC</option>
+                <option value="ethereum">ETH</option>
+                <option value="solana">SOL</option>
+                <option value="bnb">BNB</option>
+                <option value="dogecoin">DOGE</option>
+              </select>
+              <select id="history-range" class="select">
+                <option value="7d">7D</option>
+                <option value="30d">30D</option>
+                <option value="90d">90D</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="history-error" class="error-text hidden"></div>
+
+          <div class="chart-wrapper">
+            <canvas id="history-chart"></canvas>
+          </div>
+
+          <p id="history-updated" class="updated-text"></p>
+        </section>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>© 2025 Zenzoro. Built for investors – powered by your live backend & MongoDB.</span>
+    </footer>
+  </div>
+
+  <script src="/app.js" defer></script>
 </body>
 </html>
