@@ -1,134 +1,83 @@
-// ------------------------------
-// Zenzoro Backend Server
-// ------------------------------
-
 import express from "express";
 import mongoose from "mongoose";
+import dotenv from "dotenv";
 import cors from "cors";
-import path from "path";
-import { fileURLToPath } from "url";
 
-// Resolve __dirname in ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+dotenv.config();
 
-// ---------------------------------------
-// Environment variables
-// ---------------------------------------
+const app = express();
 const PORT = process.env.PORT || 8080;
 const MONGO_URI = process.env.MONGO_URI;
 
-// ---------------------------------------
-// Express setup
-// ---------------------------------------
-const app = express();
-app.use(express.json());
+// Middleware
 app.use(cors());
+app.use(express.json());
 
-// ---------------------------------------
-// MongoDB Connection
-// ---------------------------------------
+// ----- MongoDB Connection -----
 async function connectDB() {
-  if (!MONGO_URI) {
-    console.error("❌ MONGO_URI is missing. Set it in Railway Variables.");
-    process.exit(1);
-  }
-
   try {
     await mongoose.connect(MONGO_URI, {
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 5000
     });
     console.log("✅ MongoDB Connected Successfully");
   } catch (err) {
     console.error("❌ MongoDB Connection Error:", err.message);
   }
 }
-
 connectDB();
 
-// ---------------------------------------
-// API ROUTES
-// ---------------------------------------
+// ----- ROOT ROUTE (Fixes Cannot GET /) -----
+app.get("/", (req, res) => {
+  res.send(`
+      <h1 style="font-family:Arial;text-align:center;margin-top:50px;">
+        🚀 Zenzoro Backend Running
+      </h1>
+      <p style="text-align:center;font-size:18px;">
+        Available endpoints:
+      </p>
+      <ul style="text-align:center;list-style:none;font-size:18px;">
+        <li>GET /api/status</li>
+        <li>GET /api/prices</li>
+        <li>GET /api/history</li>
+      </ul>
+  `);
+});
 
-// Status Check
+// ----- /api/status -----
 app.get("/api/status", (req, res) => {
   res.json({
     status: "ok",
     service: "Zenzoro backend",
-    time: new Date().toISOString(),
+    time: new Date().toISOString()
   });
 });
 
-// Market Route (dummy example — replace with real logic)
-app.get("/api/market", async (req, res) => {
+// ----- /api/prices -----
+app.get("/api/prices", async (req, res) => {
   try {
-    // TODO: Replace with real crypto service logic
-    res.json([
-      {
-        id: "bitcoin",
-        symbol: "BTC",
-        name: "Bitcoin",
-        price: 43200,
-        change24h: -0.4,
-        marketCap: 850_000_000_000,
-        volume24h: 18_000_000_000,
-      },
-      {
-        id: "ethereum",
-        symbol: "ETH",
-        name: "Ethereum",
-        price: 2280,
-        change24h: +1.3,
-        marketCap: 280_000_000_000,
-        volume24h: 9_000_000_000,
-      },
-    ]);
-  } catch (error) {
-    console.error("Market error:", error);
-    res.status(500).json({ error: "Failed to fetch market data" });
-  }
-});
-
-// Price History (dummy — replace with real logic)
-app.get("/api/history/:coin", async (req, res) => {
-  const { coin } = req.params;
-
-  try {
-    // TODO: Replace with CoinGecko history integration
+    // Example payload - replace later with real DB logic
     res.json({
-      prices: [
-        [Date.now() - 6 * 86400000, 42000],
-        [Date.now() - 5 * 86400000, 42200],
-        [Date.now() - 4 * 86400000, 42500],
-        [Date.now() - 3 * 86400000, 43000],
-        [Date.now() - 2 * 86400000, 43500],
-        [Date.now() - 1 * 86400000, 43200],
-        [Date.now(), 43350],
-      ],
+      btc: 98765,
+      eth: 5432,
+      sol: 123
     });
-  } catch (error) {
-    console.error("History error:", error);
-    res.status(500).json({ error: "Failed to fetch history data" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch prices" });
   }
 });
 
-// ---------------------------------------
-// STATIC FRONTEND (React in /public)
-// ---------------------------------------
-const publicPath = path.join(__dirname, "../public");
-app.use(express.static(publicPath));
-
-// SPA fallback — serve React app for all non-API routes
-app.get("*", (req, res) => {
-  if (req.path.startsWith("/api")) {
-    return res.status(404).json({ error: "API route not found" });
+// ----- /api/history -----
+app.get("/api/history", async (req, res) => {
+  try {
+    res.json({
+      message: "Historical data coming soon.",
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch history" });
   }
-  res.sendFile(path.join(publicPath, "index.html"));
 });
 
-// ---------------------------------------
-// Start Server
-// ---------------------------------------
+// ----- Start Server -----
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
