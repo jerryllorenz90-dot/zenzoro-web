@@ -1,240 +1,286 @@
-// Base API URL – backend lives on same domain
+// Base URL – relative since frontend is served by the same domain
 const API_BASE = "";
 
-// Small helper
-function $(id) {
-  return document.getElementById(id);
-}
+// Demo portfolio (you can change these numbers)
+const PORTFOLIO = {
+  BTC: 0.4,
+  ETH: 2.3,
+  SOL: 10.5,
+};
 
+let latestPrices = null;
 let historyChart = null;
 
-/** Format number with compact notation */
-function formatNumber(num) {
-  if (num === null || num === undefined) return "–";
-  try {
-    return new Intl.NumberFormat("en-US", {
-      notation: "compact",
-      maximumFractionDigits: 2
-    }).format(num);
-  } catch {
-    return String(num);
-  }
+/* -------------- Auth: simple demo login -------------- */
+
+const loginForm = document.getElementById("login-form");
+const loginNameInput = document.getElementById("login-name");
+const loginPasswordInput = document.getElementById("login-password");
+const authSection = document.getElementById("auth-section");
+const profileSection = document.getElementById("profile-section");
+const profileName = document.getElementById("profile-name");
+const avatarLetter = document.getElementById("avatar-letter");
+const logoutBtn = document.getElementById("logout-btn");
+const portfolioValueEl = document.getElementById("portfolio-value");
+const portfolioChangeEl = document.getElementById("portfolio-change");
+
+function setLoggedIn(name) {
+  localStorage.setItem("zenzoroUser", name);
+  profileName.textContent = name;
+  avatarLetter.textContent = name.trim()[0]?.toUpperCase() || "U";
+  authSection.classList.add("hidden");
+  profileSection.classList.remove("hidden");
 }
 
-/** Format price with 2–4 decimals */
-function formatPrice(value) {
-  if (value === null || value === undefined || isNaN(value)) return "–";
-  const n = Number(value);
-  const decimals = n >= 100 ? 2 : 4;
-  return "$" + n.toFixed(decimals);
+function setLoggedOut() {
+  localStorage.removeItem("zenzoroUser");
+  authSection.classList.remove("hidden");
+  profileSection.classList.add("hidden");
 }
 
-/** Load backend status */
-async function loadStatus() {
-  const target = $("status-json");
-  const dot = $("status-indicator");
+loginForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const name = loginNameInput.value.trim();
+  const password = loginPasswordInput.value.trim();
+
+  if (!name || !password) return;
+
+  // Demo only – in real app you would call an auth endpoint
+  setLoggedIn(name);
+  loginPasswordInput.value = "";
+});
+
+logoutBtn.addEventListener("click", () => {
+  setLoggedOut();
+});
+
+const savedUser = localStorage.getItem("zenzoroUser");
+if (savedUser) {
+  setLoggedIn(savedUser);
+}
+
+/* -------------- Backend status -------------- */
+
+const statusOutput = document.getElementById("status-output");
+const refreshStatusBtn = document.getElementById("refresh-status");
+
+async function fetchStatus() {
+  statusOutput.textContent = "Checking...";
   try {
     const res = await fetch(`${API_BASE}/api/status`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await res.json();
-    target.textContent = JSON.stringify(json, null, 2);
-    dot.classList.remove("dot-offline");
-    dot.classList.add("dot-online");
+    statusOutput.textContent = JSON.stringify(json, null, 2);
   } catch (err) {
-    target.textContent = `Error loading status: ${err.message}`;
-    dot.classList.remove("dot-online");
-    dot.classList.add("dot-offline");
+    statusOutput.textContent = "Error loading status: " + err.message;
   }
 }
 
-/** Load market overview */
-async function loadMarket(selectedSymbol = "BTC") {
-  const errorEl = $("market-error");
-  const grid = $("market-cards");
-  const updatedEl = $("market-updated");
+refreshStatusBtn.addEventListener("click", fetchStatus);
 
-  errorEl.classList.add("hidden");
-  errorEl.textContent = "";
+/* -------------- Prices + Market overview -------------- */
 
+const refreshPricesBtn = document.getElementById("refresh-prices");
+const marketGrid = document.getElementById("market-grid");
+const portfolioTableBody = document.getElementById("portfolio-table-body");
+
+function formatUSD(value) {
+  return "$" + value.toLocaleString("en-US", { maximumFractionDigits: 2 });
+}
+
+async function fetchPrices() {
   try {
-    const res = await fetch(`${API_BASE}/api/market`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
+    refreshPricesBtn.disabled = true;
+    refreshPricesBtn.textContent = "Refreshing...";
+    const res = await fetch(`${API_BASE}/api/prices`);
+    const json = await res.json();
+    latestPrices = json;
+    renderMarketCards();
+    renderPortfolioTable();
+    refreshPricesBtn.textContent = "Refresh prices";
+  } catch (err) {
+    console.error("Error fetching prices", err);
+    refreshPricesBtn.textContent = "Failed – retry";
+  } finally {
+    refreshPricesBtn.disabled = false;
+  }
+}
 
-    const coins = data.coins || data || [];
-    if (!Array.isArray(coins) || coins.length === 0) {
-      throw new Error("No market data available");
+function renderMarketCards() {
+  if (!latestPrices) return;
+
+  const mapping = {
+    BTC: { name: "Bitcoin" },
+    ETH: { name: "Ethereum" },
+    SOL: { name: "Solana" },
+  };
+
+  marketGrid.innerHTML = "";
+
+  Object.entries(mapping).forEach(([symbol, meta]) => {
+    const price = latestPrices[symbol.toLowerCase()];
+    const card = document.createElement("div");
+    card.className = "asset-card";
+    card.innerHTML = `
+      <div class="asset-header">
+        <span class="asset-symbol">${symbol}</span>
+        <span class="asset-symbol">${new Date(
+          latestPrices.timestamp || new Date()
+        ).toLocaleTimeString()}</span>
+      </div>
+      <div class="asset-name">${meta.name}</div>
+      <div class="asset-price">${formatUSD(price)}</div>
+      <div class="asset-cap">Demo 24h change &amp; market cap coming soon</div>
+    `;
+    marketGrid.appendChild(card);
+  });
+}
+
+function renderPortfolioTable() {
+  if (!latestPrices) return;
+
+  portfolioTableBody.innerHTML = "";
+
+  let total = 0;
+  Object.entries(PORTFOLIO).forEach(([symbol, amount]) => {
+    const price = latestPrices[symbol.toLowerCase()];
+    const value = price * amount;
+    total += value;
+
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${symbol}</td>
+      <td>${amount}</td>
+      <td>${formatUSD(price)}</td>
+      <td>${formatUSD(value)}</td>
+    `;
+    portfolioTableBody.appendChild(row);
+  });
+
+  portfolioValueEl.textContent = formatUSD(total);
+  portfolioChangeEl.textContent = "+0.00% (demo)";
+}
+
+/* -------------- History chart -------------- */
+
+const historyHint = document.getElementById("history-hint");
+const historyCanvas = document.getElementById("history-chart");
+
+/**
+ * Fetch history from backend. If backend has no history yet,
+ * we generate a smooth fake 7-day curve starting from current price.
+ */
+async function fetchHistory() {
+  historyHint.textContent = "Loading chart...";
+  try {
+    const res = await fetch(`${API_BASE}/api/history`);
+    let json = await res.json();
+
+    if (!Array.isArray(json) || json.length === 0) {
+      json = generateMockHistory();
+      historyHint.textContent =
+        "Showing generated data – real history will appear once backend stores it.";
+    } else {
+      historyHint.textContent = "Live history from backend.";
     }
 
-    // Build cards
-    grid.innerHTML = "";
-    coins.forEach((coin) => {
-      const change = Number(coin.change24h || coin.change || 0);
-      const isPos = change >= 0;
-      const card = document.createElement("div");
-      card.className = "market-card";
+    const labels = json
+      .slice()
+      .reverse()
+      .map((p) =>
+        new Date(p.timestamp || p.time || new Date()).toLocaleDateString(
+          "en-US",
+          { month: "short", day: "numeric" }
+        )
+      );
+    const prices = json
+      .slice()
+      .reverse()
+      .map((p) => p.btc || p.price || 0);
 
-      card.innerHTML = `
-        <div class="market-symbol">${coin.symbol || ""}</div>
-        <div class="market-name">${coin.name || ""}</div>
-        <div class="market-price">${formatPrice(coin.price)}</div>
-        <div class="market-change ${isPos ? "pos" : "neg"}">
-          ${isPos ? "▲" : "▼"} ${change.toFixed(2)}% (24h)
-        </div>
-        <div class="market-meta">
-          Mkt Cap: ${formatNumber(coin.marketCap)} • Vol 24h: ${formatNumber(
-        coin.volume24h
-      )}
-        </div>
-      `;
+    renderHistoryChart(labels, prices);
+  } catch (err) {
+    console.error("Error fetching history", err);
+    historyHint.textContent = "Failed to load history – showing demo data.";
+    const mock = generateMockHistory();
+    const labels = mock.map((p) => p.label);
+    const prices = mock.map((p) => p.price);
+    renderHistoryChart(labels, prices);
+  }
+}
 
-      grid.appendChild(card);
+function generateMockHistory() {
+  const base =
+    latestPrices?.btc ||
+    latestPrices?.bitcoin ||
+    90000; // fallback if price not loaded yet
+  const data = [];
+  const today = new Date();
+
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const variance = (Math.sin(i / 2) * 0.03 + Math.random() * 0.01) * base;
+    const price = base * (1 + (Math.random() > 0.5 ? 1 : -1) * 0.02) + variance;
+    data.push({
+      label: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      price,
     });
-
-    const updated =
-      data.updatedAt || (coins[0] && coins[0].updatedAt) || new Date().toISOString();
-    updatedEl.textContent = `Last updated: ${new Date(updated).toLocaleString()}`;
-  } catch (err) {
-    grid.innerHTML = "";
-    errorEl.textContent = `Failed to load market data: ${err.message}`;
-    errorEl.classList.remove("hidden");
-    updatedEl.textContent = "";
   }
-
-  // Highlight selected chip
-  const chips = document.querySelectorAll("#coin-filter .chip");
-  chips.forEach((chip) => {
-    if (chip.dataset.symbol === selectedSymbol) {
-      chip.classList.add("chip-active");
-    } else {
-      chip.classList.remove("chip-active");
-    }
-  });
+  return data;
 }
 
-/** Load history and update chart */
-async function loadHistory(symbol = "bitcoin", range = "7d") {
-  const errorEl = $("history-error");
-  const updatedEl = $("history-updated");
+function renderHistoryChart(labels, prices) {
+  if (historyChart) {
+    historyChart.destroy();
+  }
 
-  errorEl.classList.add("hidden");
-  errorEl.textContent = "";
-  updatedEl.textContent = "";
-
-  try {
-    const res = await fetch(
-      `${API_BASE}/api/history/${encodeURIComponent(symbol)}?range=${encodeURIComponent(
-        range
-      )}`
-    );
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-
-    // Accept either { points:[{time,price},…] } or plain array
-    const points = data.points || data || [];
-    if (!Array.isArray(points) || points.length === 0) {
-      throw new Error("No history data available");
-    }
-
-    const labels = points.map((p) => p.time || p.date || "");
-    const values = points.map((p) => Number(p.price || p.value || 0));
-
-    const ctx = document.getElementById("history-chart").getContext("2d");
-
-    if (!historyChart) {
-      historyChart = new Chart(ctx, {
-        type: "line",
-        data: {
-          labels,
-          datasets: [
-            {
-              label: "Price",
-              data: values,
-              fill: true,
-              tension: 0.35
-            }
-          ]
+  historyChart = new Chart(historyCanvas.getContext("2d"), {
+    type: "line",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "BTC price (USD)",
+          data: prices,
+          tension: 0.35,
+          borderWidth: 2,
+          pointRadius: 0,
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false }
+      ],
+    },
+    options: {
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
+      scales: {
+        x: {
+          grid: {
+            display: false,
           },
-          scales: {
-            x: {
-              ticks: { color: "#8e97c6", maxTicksLimit: 7 },
-              grid: { color: "rgba(255,255,255,0.04)" }
-            },
-            y: {
-              ticks: {
-                color: "#8e97c6",
-                callback: (v) => "$" + v.toLocaleString()
-              },
-              grid: { color: "rgba(255,255,255,0.04)" }
-            }
+        },
+        y: {
+          ticks: {
+            callback: (value) => "$" + value.toLocaleString("en-US"),
           },
-          elements: {
-            point: { radius: 0 }
-          }
-        }
-      });
-    } else {
-      historyChart.data.labels = labels;
-      historyChart.data.datasets[0].data = values;
-      historyChart.update();
-    }
-
-    const updated =
-      data.updatedAt || (points[points.length - 1] && points[points.length - 1].time);
-    if (updated) {
-      updatedEl.textContent = `Last price at: ${new Date(updated).toLocaleString()}`;
-    }
-  } catch (err) {
-    if (historyChart) {
-      historyChart.destroy();
-      historyChart = null;
-    }
-    errorEl.textContent = `Failed to load chart data: ${err.message}`;
-    errorEl.classList.remove("hidden");
-  }
+        },
+      },
+    },
+  });
 }
 
-/** Wire up events & initial load */
-document.addEventListener("DOMContentLoaded", () => {
-  // Initial loads
-  loadStatus();
-  loadMarket("BTC");
-  loadHistory("bitcoin", "7d");
+/* -------------- Init -------------- */
 
-  // Refresh button
-  $("refresh-all").addEventListener("click", () => {
-    const currentSymbolChip = document.querySelector("#coin-filter .chip-active");
-    const symbolChip = currentSymbolChip
-      ? currentSymbolChip.dataset.symbol
-      : "BTC";
-    const historySymbol = $("history-symbol").value;
-    const historyRange = $("history-range").value;
+async function init() {
+  fetchStatus();
+  await fetchPrices();
+  await fetchHistory();
 
-    loadStatus();
-    loadMarket(symbolChip);
-    loadHistory(historySymbol, historyRange);
-  });
+  // Auto-refresh prices every 60s
+  setInterval(fetchPrices, 60000);
+}
 
-  // Market chip clicks
-  document.getElementById("coin-filter").addEventListener("click", (e) => {
-    const btn = e.target.closest(".chip");
-    if (!btn) return;
-    const symbol = btn.dataset.symbol || "BTC";
-    loadMarket(symbol);
-  });
+refreshPricesBtn.addEventListener("click", fetchPrices);
 
-  // History selectors
-  $("history-symbol").addEventListener("change", () => {
-    loadHistory($("history-symbol").value, $("history-range").value);
-  });
-
-  $("history-range").addEventListener("change", () => {
-    loadHistory($("history-symbol").value, $("history-range").value);
-  });
-});
+document.addEventListener("DOMContentLoaded", init);
