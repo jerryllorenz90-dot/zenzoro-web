@@ -1,62 +1,186 @@
 :root {
-    --bg: #0d0d16;
-    --card: #161625;
-    --text: #ffffff;
-    --accent: #e448ff;
-    --accent-dark: #6a00ff;
-    --green: #32f5c8;
+  --bg: #0d0d16;
+  --card: #181824;
+  --card-soft: #202035;
+  --text: #f5f5ff;
+  --muted: #9c92b5;
+  --accent: #e448ff;
+  --accent-strong: #6a00ff;
+  --success: #32f5c8;
+  --radius: 16px;
+  --shadow: 0 18px 40px rgba(0, 0, 0, 0.65);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Inter', sans-serif;
-    padding: 0;
-    margin: 0;
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #3b1a5b, #0d0d16 45%);
+  color: var(--text);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
 }
 
-/* HEADER */
 .hero {
-    text-align: center;
-    padding: 40px 20px;
+  text-align: center;
+  padding: 32px 16px 20px;
 }
 
 .logo {
-    width: 110px;
-    filter: drop-shadow(0 0 20px var(--accent));
+  width: 96px;
+  height: 96px;
+  border-radius: 24px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 20px rgba(228, 72, 255, 0.9));
 }
 
-/* CARDS */
+.hero h1 {
+  margin: 8px 0 4px;
+  font-size: 1.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.hero p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.layout {
+  max-width: 960px;
+  margin: 0 auto 28px;
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 .card {
-    background: var(--card);
-    margin: 20px;
-    padding: 20px;
-    border-radius: 16px;
-    box-shadow: 0 0 15px #e448ff44;
+  background: radial-gradient(circle at top left, #262545, #181824);
+  border-radius: var(--radius);
+  padding: 16px 16px 18px;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-/* BUTTONS */
-button {
-    background: var(--accent);
-    border: none;
-    padding: 12px 20px;
-    border-radius: 10px;
-    color: #fff;
-    margin: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: 0.3s ease;
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
-button:hover {
-    background: var(--accent-dark);
-    box-shadow: 0 0 12px var(--accent);
+.card-header h2 {
+  margin: 0;
+  font-size: 1rem;
 }
 
-/* PRE FORMATTING */
-pre {
-    background: #11111a;
-    padding: 12px;
-    border-radius: 10px;
-    white-space: pre-wrap;
+/* Buttons */
+.btn {
+  border-radius: 999px;
+  border: none;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+  color: #fff;
+  box-shadow: 0 12px 30px rgba(106, 0, 255, 0.5);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+  box-shadow: 0 16px 36px rgba(228, 72, 255, 0.55);
+}
+
+/* Chips */
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.chip {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(15, 23, 42, 0.85);
+  color: var(--muted);
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.chip:hover {
+  background: var(--accent-strong);
+  color: #fff;
+  border-color: transparent;
+}
+
+/* Controls */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+  align-items: center;
+}
+
+.controls label {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.controls select {
+  margin-left: 4px;
+  background: rgba(15, 23, 42, 0.9);
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  color: var(--text);
+  padding: 4px 10px;
+  font-size: 0.8rem;
+}
+
+/* Code box */
+.code-box {
+  margin: 0;
+  padding: 10px 12px;
+  background: #050510;
+  border-radius: 12px;
+  font-size: 0.78rem;
+  font-family: ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+  color: #e5e7eb;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  max-height: 200px;
+  overflow: auto;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--muted);
+  padding-bottom: 16px;
+}
+
+@media (min-width: 880px) {
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    grid-auto-rows: auto;
+  }
+
+  .layout > .card:nth-child(1) {
+    grid-column: 1 / -1;
+  }
 }
