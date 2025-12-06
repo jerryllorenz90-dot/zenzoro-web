@@ -1,42 +1,44 @@
-import express from "express";
-import dotenv from "dotenv";
-import cors from "cors";
-import connectDB from "./config/db.js";
-
-import statusRoutes from "./routes/statusRoutes.js";
-import priceRoutes from "./routes/priceRoutes.js";
-import historyRoutes from "./routes/historyRoutes.js";
+const express = require("express");
+const cors = require("cors");
+const dotenv = require("dotenv");
+const path = require("path");
+const connectDB = require("./db");
 
 dotenv.config();
-const app = express();
-const PORT = process.env.PORT || 8080;
 
-// Middleware
+const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Connect MongoDB
+// Connect to MongoDB
 connectDB();
 
-// Root route so Railway doesn't show "Cannot GET /"
+// Serve static frontend from ../public
+const publicPath = path.join(__dirname, "..", "public");
+app.use(express.static(publicPath));
+
+// Root → send index.html (frontend)
 app.get("/", (req, res) => {
-  res.send(`
-    <h1>Zenzoro Backend Running 🚀</h1>
-    <p>Available Routes:</p>
-    <ul>
-      <li>/api/status</li>
-      <li>/api/prices</li>
-      <li>/api/history</li>
-    </ul>
-  `);
+  res.sendFile(path.join(publicPath, "index.html"));
 });
 
-// API Routes
-app.use("/api/status", statusRoutes);
+// Health check for backend
+app.get("/api/status", (req, res) => {
+  res.json({
+    status: "ok",
+    service: "Zenzoro Backend",
+    time: new Date().toISOString(),
+  });
+});
+
+// API routes
+const priceRoutes = require("./routes/priceRoutes");
+const historyRoutes = require("./routes/historyRoutes");
+const fetchRoutes = require("./routes/fetchRoutes");
+
 app.use("/api/prices", priceRoutes);
 app.use("/api/history", historyRoutes);
+app.use("/api/fetch", fetchRoutes);
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
