@@ -1,0 +1,51 @@
+:root {
+  --primary: #635BFF;
+  --accent: #E448FF;
+  --success: #32F5C8;
+  --warning: #F5B032;
+
+  --bg: #0F0F16;
+  --card: #1A1A24;
+  --text: #EDEDED;
+  --text-muted: #A5A5A8;
+
+  --radius: 14px;
+  --shadow: 0 8px 28px rgba(0,0,0,0.25);
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Inter", sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  padding: 24px;
+  text-align: center;
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.card {
+  background: var(--card);
+  padding: 20px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin: 20px;
+}
+
+button {
+  background: var(--primary);
+  border: none;
+  padding: 12px 20px;
+  border-radius: var(--radius);
+  color: white;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button:hover {
+  background: var(--accent);
+}
