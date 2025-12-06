@@ -1,10 +1,10 @@
-import fetchCrypto from "../utils/fetchCrypto.js";
+const priceService = require("../services/priceService");
 
-export const getPrices = async (req, res) => {
+exports.getPrice = async (req, res) => {
   try {
-    const prices = await fetchCrypto();
-    res.json(prices);
-  } catch (err) {
-    res.status(500).json({ error: "Failed to fetch prices" });
+    const data = await priceService.fetchPrice(req.query.coin);
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch price" });
   }
 };
