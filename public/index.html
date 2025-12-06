@@ -1,65 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Zenzoro – Crypto Monitoring</title>
-    <link rel="stylesheet" href="style.css" />
-    <link rel="icon" href="logo/favicon.ico" />
+  <meta charset="UTF-8" />
+  <title>Zenzoro – Crypto Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="logo/shield-logo.png" />
 </head>
-
 <body>
+  <header class="hero">
+    <img src="logo/shield-logo.png" alt="Zenzoro Logo" class="logo" />
+    <h1>Zenzoro</h1>
+    <p>Real-time Crypto Monitoring & Insights</p>
+  </header>
 
-    <header class="hero">
-        <img src="logo/logo.png" class="logo" alt="Zenzoro Logo">
-        <h1>Zenzoro</h1>
-        <p>Real-time Crypto Monitoring Dashboard</p>
-    </header>
-
+  <main class="layout">
+    <!-- STATUS CARD -->
     <section class="card">
+      <div class="card-header">
         <h2>Server Status</h2>
-        <button onclick="checkStatus()">Check Status</button>
-        <pre id="statusResult"></pre>
+        <button class="btn" onclick="checkStatus()">Check</button>
+      </div>
+      <pre id="statusResult" class="code-box">
+Press "Check" to verify backend...
+      </pre>
     </section>
 
+    <!-- MARKET OVERVIEW CARD -->
     <section class="card">
+      <div class="card-header">
         <h2>Market Overview</h2>
+      </div>
 
-        <div class="button-row">
-            <button onclick="loadPrice('bitcoin')">BTC</button>
-            <button onclick="loadPrice('ethereum')">ETH</button>
-            <button onclick="loadPrice('solana')">SOL</button>
-            <button onclick="loadPrice('binancecoin')">BNB</button>
-            <button onclick="loadPrice('dogecoin')">DOGE</button>
-        </div>
+      <div class="chip-row">
+        <button class="chip" onclick="loadOverview('btc')">BTC</button>
+        <button class="chip" onclick="loadOverview('eth')">ETH</button>
+        <button class="chip" onclick="loadOverview('sol')">SOL</button>
+        <button class="chip" onclick="loadOverview('bnb')">BNB</button>
+        <button class="chip" onclick="loadOverview('doge')">DOGE</button>
+      </div>
 
-        <pre id="priceResult"></pre>
+      <pre id="overviewResult" class="code-box"></pre>
     </section>
 
+    <!-- HISTORY CARD -->
     <section class="card">
-        <h2 id="history-title">Price History</h2>
+      <div class="card-header">
+        <h2>Price History</h2>
+      </div>
 
-        <label>Symbol:</label>
-        <select id="symbol">
-            <option>BTC</option>
-            <option>ETH</option>
-            <option>SOL</option>
-            <option>BNB</option>
-            <option>DOGE</option>
-        </select>
+      <div class="controls">
+        <label>
+          Symbol:
+          <select id="historySymbol">
+            <option value="btc">BTC</option>
+            <option value="eth">ETH</option>
+            <option value="sol">SOL</option>
+            <option value="bnb">BNB</option>
+            <option value="doge">DOGE</option>
+          </select>
+        </label>
 
-        <label>Range:</label>
-        <select id="range">
-            <option value="7d">7d</option>
-            <option value="14d">14d</option>
-            <option value="30d">30d</option>
-        </select>
+        <label>
+          Range:
+          <select id="historyDays">
+            <option value="7">7 days</option>
+            <option value="14">14 days</option>
+            <option value="30">30 days</option>
+          </select>
+        </label>
 
-        <button onclick="loadHistory()">Load History</button>
+        <button class="btn" onclick="loadHistory()">Load History</button>
+      </div>
 
-        <pre id="historyResult"></pre>
+      <pre id="historyResult" class="code-box"></pre>
     </section>
+  </main>
 
-    <script src="app.js"></script>
+  <footer class="footer">
+    © <span id="year"></span> Zenzoro. Built for investors.
+  </footer>
+
+  <script src="app.js"></script>
 </body>
 </html>
