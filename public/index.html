@@ -1,66 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Zenzoro – Real-time Crypto Dashboard</title>
-  <link rel="stylesheet" href="styles.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Zenzoro – Crypto Monitoring</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="logo/favicon.ico" />
 </head>
 
 <body>
-  <header>
-    <img src="logo.png" class="logo" alt="Zenzoro Logo" />
 
-    <h1 class="title">Zenzoro</h1>
-    <p class="subtitle">Real-time Crypto Intelligence</p>
+    <header class="hero">
+        <img src="logo/logo.png" class="logo" alt="Zenzoro Logo">
+        <h1>Zenzoro</h1>
+        <p>Real-time Crypto Monitoring Dashboard</p>
+    </header>
 
-    <button id="themeToggle">🌙</button>
-  </header>
+    <section class="card">
+        <h2>Server Status</h2>
+        <button onclick="checkStatus()">Check Status</button>
+        <pre id="statusResult"></pre>
+    </section>
 
-  <section class="card">
-    <h2>Server Status</h2>
-    <button onclick="checkStatus()">Check Status</button>
-    <pre id="statusOutput"></pre>
-  </section>
+    <section class="card">
+        <h2>Market Overview</h2>
 
-  <section class="card">
-    <h2>Market Overview</h2>
+        <div class="button-row">
+            <button onclick="loadPrice('bitcoin')">BTC</button>
+            <button onclick="loadPrice('ethereum')">ETH</button>
+            <button onclick="loadPrice('solana')">SOL</button>
+            <button onclick="loadPrice('binancecoin')">BNB</button>
+            <button onclick="loadPrice('dogecoin')">DOGE</button>
+        </div>
 
-    <div class="symbol-buttons">
-      <button onclick="loadOverview('btc')">BTC</button>
-      <button onclick="loadOverview('eth')">ETH</button>
-      <button onclick="loadOverview('sol')">SOL</button>
-      <button onclick="loadOverview('bnb')">BNB</button>
-      <button onclick="loadOverview('doge')">DOGE</button>
-    </div>
+        <pre id="priceResult"></pre>
+    </section>
 
-    <pre id="overviewOutput"></pre>
-  </section>
+    <section class="card">
+        <h2 id="history-title">Price History</h2>
 
-  <section class="card">
-    <h2>History</h2>
+        <label>Symbol:</label>
+        <select id="symbol">
+            <option>BTC</option>
+            <option>ETH</option>
+            <option>SOL</option>
+            <option>BNB</option>
+            <option>DOGE</option>
+        </select>
 
-    <label>Symbol:
-      <select id="historySymbol">
-        <option>btc</option>
-        <option>eth</option>
-        <option>sol</option>
-      </select>
-    </label>
+        <label>Range:</label>
+        <select id="range">
+            <option value="7d">7d</option>
+            <option value="14d">14d</option>
+            <option value="30d">30d</option>
+        </select>
 
-    <label>Range:
-      <select id="historyRange">
-        <option value="1">24h</option>
-        <option value="7">7d</option>
-        <option value="30">30d</option>
-      </select>
-    </label>
+        <button onclick="loadHistory()">Load History</button>
 
-    <button onclick="loadHistory()">Load History</button>
+        <pre id="historyResult"></pre>
+    </section>
 
-    <pre id="historyOutput"></pre>
-  </section>
-
-  <script src="app.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
