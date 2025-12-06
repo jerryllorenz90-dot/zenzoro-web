@@ -1,32 +1,40 @@
-const API = "/api";
+const API = "https://zenzoro.online/api";
 
+/* SERVER CHECK */
 async function checkStatus() {
-  const res = await fetch(`${API}/status`);
-  const data = await res.json();
-  document.getElementById("statusOutput").textContent = JSON.stringify(data, null, 2);
+    try {
+        const res = await fetch(`${API}/status`);
+        const data = await res.json();
+        document.getElementById("statusResult").textContent =
+            JSON.stringify(data, null, 2);
+    } catch (err) {
+        document.getElementById("statusResult").textContent = "Error: " + err;
+    }
 }
 
-async function loadOverview(symbol) {
-  const res = await fetch(`${API}/overview?symbol=${symbol}`);
-  const data = await res.json();
-  document.getElementById("overviewOutput").textContent = JSON.stringify(data, null, 2);
+/* PRICES */
+async function loadPrice(symbol) {
+    try {
+        const res = await fetch(`${API}/prices/${symbol}`);
+        const data = await res.json();
+        document.getElementById("priceResult").textContent =
+            JSON.stringify(data, null, 2);
+    } catch (err) {
+        document.getElementById("priceResult").textContent = "Error: " + err;
+    }
 }
 
+/* HISTORY */
 async function loadHistory() {
-  const symbol = document.getElementById("historySymbol").value;
-  const range = document.getElementById("historyRange").value;
+    const symbol = document.getElementById("symbol").value;
+    const range = document.getElementById("range").value;
 
-  const res = await fetch(`${API}/history?symbol=${symbol}&days=${range}`);
-  const data = await res.json();
-
-  document.getElementById("historyOutput").textContent = JSON.stringify(
-    data,
-    null,
-    2
-  );
+    try {
+        const res = await fetch(`${API}/history/${symbol}/${range}`);
+        const data = await res.json();
+        document.getElementById("historyResult").textContent =
+            JSON.stringify(data, null, 2);
+    } catch (err) {
+        document.getElementById("historyResult").textContent = "Error: " + err;
+    }
 }
-
-// THEME SWITCHER
-document.getElementById("themeToggle").addEventListener("click", () => {
-  document.body.classList.toggle("light");
-});
