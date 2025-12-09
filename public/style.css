@@ -64,6 +64,11 @@ h2 {
     border-radius: 10px;
     margin: 10px 0;
     font-size: 15px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    opacity: 0.85;
 }
 
 .token-buttons button {
@@ -73,6 +78,11 @@ h2 {
     padding: 6px 14px;
     margin: 4px;
     border-radius: 12px;
+    cursor: pointer;
+}
+
+.token-buttons button:hover {
+    background: #3a3a4a;
 }
 
 .output {
@@ -82,6 +92,23 @@ h2 {
     font-size: 13px;
     overflow-x: auto;
     border-radius: 10px;
+    white-space: pre-wrap;
+}
+
+/* Input Row */
+.input-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+select {
+    padding: 6px 8px;
+    border-radius: 8px;
+    border: none;
+    background: #222;
+    color: white;
 }
 
 /* Footer */
